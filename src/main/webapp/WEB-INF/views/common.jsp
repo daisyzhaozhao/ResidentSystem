@@ -11,3 +11,7 @@
 <script src="${ctx}/js/easyui/locale/easyui-lang-zh_CN.js" type="text/javascript"></script>
 <link href="${ctx}/js/easyui/themes/default/easyui.css" rel="stylesheet" type="text/css" />
 <link href="${ctx}/js/easyui/themes/icon.css" rel="stylesheet" type="text/css" />
+<script src="${ctx}/js/plupload-2.1.0/js/plupload.full.min.js"
+	type="text/javascript"></script>
+<script src="${ctx}/js/jquery.form.js" type="text/javascript"></script>
+<script src="${ctx}/js/jquery.serializeJson.js" type="text/javascript"></script>

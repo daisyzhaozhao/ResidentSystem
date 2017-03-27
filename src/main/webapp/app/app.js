@@ -6,7 +6,7 @@ Ext.application({
     autoCreateViewport:false,
 
     models:['User'],
-    stores:['Users'],
+    residents:['Users'],
     controllers:['Users'],
 
     launch:function ()

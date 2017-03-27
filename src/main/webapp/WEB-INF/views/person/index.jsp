@@ -10,7 +10,7 @@
 var teacherAlldatagrid;
 $(function(){
 	teacherAlldatagrid=$('#dg').datagrid({
-// 		url:"${ctx}/person/list.do",//加载的URL
+ 		url:"${ctx}/person/list.do",//加载的URL
 	    isField:"id",
 		pagination:true,//显示分页
 		pageSize:10,//分页大小

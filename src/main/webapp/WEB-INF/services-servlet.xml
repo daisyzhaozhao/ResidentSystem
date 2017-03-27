@@ -19,7 +19,7 @@
     <!-- *****
 		   * REST API Service
 	 ****** -->
-	<bean id="userService" class="cn.edu.nuc.Store.services.UserService"></bean>
+	
 
 
 

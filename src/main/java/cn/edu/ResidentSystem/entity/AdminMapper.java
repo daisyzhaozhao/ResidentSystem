@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import cn.edu.ResidentSystem.model.Admin;
+import cn.edu.ResidentSystem.model.Login;
 import cn.edu.ResidentSystem.model.PageBean;
 
 public interface AdminMapper {
@@ -22,9 +23,13 @@ public interface AdminMapper {
 
 	Admin selectByAdminName(String adminname);
 	
-	int countAll();
+	int countAll(@Param("admin")Admin admin);
 	
-	List<Admin> query(@Param("page")PageBean page);
+	List<Admin> query(@Param("admin")Admin admin,@Param("page")PageBean page);
 	
 	Admin selectById(int id);
+	
+	Login selectByNo(String adminname);
+	
+	void insertLogin(@Param("login")Login login);
 }

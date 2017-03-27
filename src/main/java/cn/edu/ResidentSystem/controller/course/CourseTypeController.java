@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.gson.Gson;
 
 import cn.edu.ResidentSystem.model.CourseSubject;
+import cn.edu.ResidentSystem.model.Office;
 import cn.edu.ResidentSystem.services.impl.CourseSubjectService;
 
 @Controller
@@ -26,7 +27,7 @@ public class CourseTypeController {
 		
 	}
 	
-	@RequestMapping(value="/secondNode.do", produces={"application/json;charset=utf-8"})
+	@RequestMapping(value="/courseSubject/secondNode.do", produces={"application/json;charset=utf-8"})
 	 @ResponseBody
 	 	public String getSecondNode(CourseSubject query, Model model){
 		 List<CourseSubject> list = courseSubjectService.querySecondNodes(query);
@@ -35,5 +36,17 @@ public class CourseTypeController {
 		 System.out.println(json);
 		 return json;
 	 }
+	
+	@RequestMapping(value="/courseSubject/secretaryoffice.do", produces={"application/json;charset=utf-8"})
+	@ResponseBody
+	public String getSecretaryOffice(Office office,Model model){
+		List<Office> list = courseSubjectService.querySecretaryOffice(office);
+		Gson gson = new Gson();
+		 String json = gson.toJson(list);
+		 System.out.println(json);
+		 return json;
+	}
+	
+	
 
 }

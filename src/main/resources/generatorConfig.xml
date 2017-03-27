@@ -12,7 +12,7 @@
             </commentGenerator>  
             <!-- 数据库链接URL、用户名、密码 -->  
             <jdbcConnection driverClass="com.mysql.jdbc.Driver"  
-                connectionURL="jdbc:mysql://127.0.0.1:3306/store" userId="root" password="" />  
+                connectionURL="jdbc:mysql://127.0.0.1:3306/resident" userId="root" password="" />  
             <!-- 生成模型的包名和位置 -->  
              <javaModelGenerator targetPackage="model" targetProject="ResidentSystem/src/main/java" />  
              <!-- 生成DAO的包名和位置 -->  

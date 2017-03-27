@@ -7,9 +7,21 @@
 		<result property="subjectName" column="name"></result>
 		<result property="subjectCode" column="subject_code"></result>
 	</resultMap>
+   
+    <resultMap type="Office" id="secretaryOfficeMap">
+		<id property="id" column="id"></id>
+		<result property="officeName" column="officename"></result>
+		<result property="officeCode" column="officecode"></result>
+	</resultMap>
   
   <select id="querySecondNodes" resultMap="CourseSubjectMap">
     	 select * from course_subject
     </select>
+    <select id="getSubjectByName" resultMap="CourseSubjectMap">
+         select * from course_subject where name=#{name}
+    </select>
     
+    <select id="querySecretaryOffice" resultMap="secretaryOfficeMap">
+    	 select * from se_office
+    </select>
 </mapper>

@@ -4,7 +4,7 @@ public class PageBean {
 	private int currPage = 1; // 当前页码
 	private int pageSize = 10; // 每页行数
 	private int total; // 总行数
-	private int pageCnt; // 总页数
+	private int pageCnt; // 总页数 
 	
 	// 起始记录index
     private int beginIndex;

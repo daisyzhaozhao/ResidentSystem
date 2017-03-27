@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import cn.edu.ResidentSystem.model.Admin;
+import cn.edu.ResidentSystem.model.Login;
 import cn.edu.ResidentSystem.services.impl.LoginService;
 
 @Controller
@@ -24,17 +24,12 @@ public class AdminController {
 		return "/admin/adminlogin";
 	}
 	@RequestMapping(value="/adminlogindo",method=RequestMethod.POST)
-	public String adminlogindo(Admin admin,HttpSession session,Model model){
-		if(loginServer.select(admin.getAdminname())!=null){
-			if(loginServer.select(admin.getAdminname()).getAdminpass().equals(admin.getAdminpass())){
-				session.setAttribute("admin",loginServer.select(admin.getAdminname()));
-				return "redirect:/adminMeau";
-			}else{
-				model.addAttribute("msg", "用户名密码错误，请稍后再试！");
-				return "forward:WEB-INF/views/admin/adminlogin.jsp";
-			}
+	public String adminlogindo(Login admin,HttpSession session,Model model){
+		if(loginServer.select(admin.getAdminname()).getAdminpass().equals(admin.getAdminpass())){
+			session.setAttribute("admin",loginServer.select(admin.getAdminname()));
+			return "redirect:/adminMeau";
 		}else{
-			model.addAttribute("msg", "用户名不存在，请查证后再试！");
+			model.addAttribute("msg", "用户名密码错误，请稍后再试！");
 			return "forward:WEB-INF/views/admin/adminlogin.jsp";
 		}
 	}

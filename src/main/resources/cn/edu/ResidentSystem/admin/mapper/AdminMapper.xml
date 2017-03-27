@@ -3,16 +3,40 @@
 <mapper namespace="cn.edu.ResidentSystem.entity.AdminMapper" >
   <resultMap id="BaseResultMap" type="cn.edu.ResidentSystem.model.Admin" >
     <id column="AdminNo" property="adminno" jdbcType="INTEGER" />
-    <result column="AdminName" property="adminname" jdbcType="VARCHAR" />
-    <result column="AdminPass" property="adminpass" jdbcType="VARCHAR" />
-    <result column="id" property="id" />
+    <result column="Grade" property="grade" />
+    <result column="Name" property="name" />
+    <result column="StudentState" property="studentState" />
+    <result column="TrainState" property="trainState" />
+    <result column="Sex" property="sex" />
+    <result column="Education" property="education" />
+    <result column="Teacher" property="teacher" />
+    <result column="Major" property="major" />
+    <result column="Company" property="company" />
+    <result column="Office" property="office" />
+    <result column="PhoneNum" property="phoneNum" />
+    <result column="BankNum" property="bankNum" />
+    <result column="IdCard" property="idCard" />
+    <result column="GraduateInstitutions" property="graduateInstitutions" />
+    <result column="MaxGraduate" property="maxGraduate" />
+    <result column="Technical" property="technical" />
+    <result column="DoctorQulification" property="doctorQulification" />
+    <result column="Practicing" property="practicing" />
+    <result column="Career" property="career" />
+    <result column="Identity" property="identity" />
+    <result column="Yorndoctor" property="yorndoctor" />
+    <result column="Trainyear" property="trainyear" />
+    <result column="login_id" property="login_id" />
   </resultMap>
-  <sql id="Base_Column_List" >
-    AdminNo, AdminName, AdminPass
-  </sql>
+  
+ <resultMap id="LoginResultMap" type="cn.edu.ResidentSystem.model.Login" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="AdminName" property="adminname" />
+    <result column="AdminPass" property="adminpass" />
+    
+  </resultMap>
+  
   <select id="selectByAdminName" resultMap="BaseResultMap" parameterType="java.lang.String" >
-    select 
-    <include refid="Base_Column_List" />
+    select *
     from admin
     where AdminName = #{adminname,jdbcType=VARCHAR}
   </select>
@@ -21,9 +45,13 @@
     where AdminNo = #{adminno,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="cn.edu.ResidentSystem.model.Admin" >
-    insert into admin (AdminNo, AdminName, AdminPass
+    insert into admin (Grade,Name,StudentState,TrainState,Sex,Education,Teacher,
+                        Major,Company,Office,PhoneNum,BankNum,IdCard,GraduateInstitutions,MaxGraduate,Technical,
+                        DoctorQulification,Practicing,Career,Identity,Yorndoctor,Trainyear,login_id
       )
-    values (#{adminno,jdbcType=INTEGER}, #{adminname,jdbcType=VARCHAR}, #{adminpass,jdbcType=VARCHAR}
+    values (#{grade}, #{name},#{studentState},#{trainState},#{sex},#{education},#{teacher},#{major},#{company},#{office},
+            #{phoneNum},#{bankNum},#{idCard},#{graduateInstitutions},#{maxGraduate},#{technical},#{doctorQulification}
+            ,#{practicing},#{career},#{identity},#{yorndoctor},#{trainyear},#{login_id}
       )
   </insert>
   <insert id="insertSelective" parameterType="cn.edu.ResidentSystem.model.Admin" >
@@ -51,6 +79,7 @@
       </if>
     </trim>
   </insert>
+  
   <update id="updateByPrimaryKeySelective" parameterType="cn.edu.ResidentSystem.model.Admin" >
     update admin
     <set >
@@ -70,17 +99,33 @@
     where AdminNo = #{adminno,jdbcType=INTEGER}
   </update>
   <select id="countAll"  resultType="int">
-        select count(*) from admin
+        select count(*) from admin where 1=1 
+		<if test="admin.name!=null" >
+		and name like '%${admin.name}%' 
+		</if>
     </select>
     
     <select id="query" resultMap="BaseResultMap" >
-		select * from admin
-         <if test="page != null">
+		select * from admin  where 1=1 
+		<if test="admin.name!=null" >
+		and name like '%${admin.name}%' 
+		</if>
+        <if test="page != null">
         		limit #{page.beginIndex}, #{page.pageSize}
-        	</if>
+        </if>
     </select>
     
     <select id="selectById" resultMap="BaseResultMap">
           select * from admin where id=#{id}
     </select>
+    
+    <select id="selectByNo" resultMap="LoginResultMap" parameterType="java.lang.String">
+          select * from td_login where AdminName=#{adminname}
+    </select>
+    
+    <insert id="insertLogin"  parameterType="cn.edu.ResidentSystem.model.Login" useGeneratedKeys="true">
+        insert into td_login (AdminName, AdminPass  )
+        values (#{login.adminname,jdbcType=VARCHAR}, #{login.adminpass,jdbcType=VARCHAR}
+        )
+    </insert>
 </mapper>

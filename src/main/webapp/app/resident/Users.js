@@ -1,5 +1,5 @@
-Ext.define('MyApp.store.Users', {
-    extend:'Ext.data.Store',
+Ext.define('MyApp.resident.Users', {
+    extend:'Ext.data.resident',
     model:'MyApp.model.User',
     autoLoad:true,
 

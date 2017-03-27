@@ -9,6 +9,7 @@ public class Msg {
 	 * 具体错误定位
 	 */
 	private int msg;
+	
 	public int getRow() {
 		return row;
 	}

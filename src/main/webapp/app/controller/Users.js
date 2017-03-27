@@ -1,7 +1,8 @@
 Ext.define("MyApp.controller.Users", {
     extend:'Ext.app.Controller',
 
-    stores:['Users'],
+   //
+    resident:['Users'],
     models:['User'],
     views:['user.List', 'user.Edit'],
 
@@ -49,6 +50,7 @@ Ext.define("MyApp.controller.Users", {
     {
         console.log('{MyApp.controller.Users} clicked the SYNC button');
 
-        this.getUsersStore().sync();
+        //
+        this.getUsersResident().sync();
     }
 });

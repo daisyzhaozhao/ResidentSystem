@@ -10,4 +10,8 @@ public class MonthRotateQueryController {
 		return "/monthrotatequery/index";
 		
 	}
+	
+	
 }
+
+

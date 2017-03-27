@@ -5,8 +5,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Insert title here</title>
-   <%@ include file="/WEB-INF/views/common.jsp" %>
-		<script>
+<%@ include file="/WEB-INF/views/common.jsp" %>
+<script>
 var datagrid;
 $(function(){
 	initCombox();
@@ -22,16 +22,48 @@ $(function(){
 		//selectOnCheck: true,
 		//checkOnSelect: true,
 		
-		columns:[[      //每个列具体内容
+		columns:[[    
+		                  //每个列具体内容
 		                  {field:'id', hidden:true },  
 			              {field:'adminname', title:'登录号', align:'center' },
 			              {field:'adminno', title:'学员编号',align:'center' },
 			              {field:'grade', title:'年级',align:'center' },
 			              {field:'name', title:'姓名',align:'center'},
 			              {field:'studentState',title:'学员状态',align:'center'},
+			              
+			              /*,{
+								field : 'studentState',
+								title : '学员状态',
+								align : 'center',
+								formatter : function(value, rowData,
+										rowIndex) {
+									//alert(rowData.residencyQualifyStatus);
+									if (rowData.studentState == '0') {
+										return '<span>未申请</span>';
+									} else if (rowData.studentState == '1') {
+										return '<span>已提交</span>';
+									}else if (rowData.studentState == '2') {
+										return '<span>已变更</span>';
+									}else if (rowData.studentState == '3') {
+										return '<span>已离院</span>';
+									}
+								}
+					     },*/
 			              {field:'trainState', title:'培训状态', align:'center',
 			            		formatter:function(value,rowData,rowIndex) {
-			            			switch (rowData.trainStatusCode) {
+			            			if (value == '1') {
+										return "在培";
+									} else if(value == '2') {
+										return "毕业";
+									}else if(value == '3') {
+										return "暂停培训";
+									}else if(value == '4') {
+										return "退出培训";
+									}else{
+										return "--"
+									}
+			            			
+			            			/*switch (rowData.trainStatusCode) {
 			            			case 1:
 			            				return "在培";
 			            			case 2:
@@ -42,7 +74,7 @@ $(function(){
 			            				return "退出培训";
 			            			default:
 			            				return "--";
-			            			}
+			            			}*/
 			            		}  
 			              },
 			              {field:'sex', title:'性别', align:'center',
@@ -123,7 +155,10 @@ $(function(){
 							
 	              
 	          ]],
-	          
+	          onBeforeLoad : function(param) {
+					param.studentState = 0;
+			  },
+			  
 	          toolbar:[    
 	                {text:"增加",iconCls:"icon-add",handler:function(){
 	                     $('#add').dialog('open');
@@ -208,7 +243,7 @@ $(function(){
 			        {text : "下载模板",
 						iconCls : "icon-save",
 						handler : function() {
-							document.GridExportForm.action = '${ctx}/person/undergraduate/exportUndergraduateExcel.do';
+							document.GridExportForm.action = '${ctx}/resident/exportResidentExcel.do';
 							document.GridExportForm.submit();
 						}
 					},
@@ -221,7 +256,7 @@ $(function(){
 	      	
 	 $("#th_search").click(function(){
    		var param=$("#selForm").serializeJson();
-   		teacherAlldatagrid.datagrid('load',param);
+   		datagrid.datagrid('load',param);
    	});
 	 
 	 $('#add').dialog({
@@ -366,21 +401,153 @@ $(function(){
 	 		datagrid.datagrid('reload');
 	 	}
 	 });
+	 
+	 $('#ddUpload').dialog({
+		    title: "上传",
+		    closed:true,
+		    modal: true, //dialog继承自window，而window里面有modal属性，所以dialog也可以使用
+
+			onClose: function() {
+				datagrid.datagrid('unselectAll');
+				datagrid.datagrid('reload');
+			}
+	 });
+     
+	 
+	 var uploader = new plupload.Uploader({
+    		runtimes : 'html5,flash,silverlight,html4',
+    		browse_button : 'pickfiles', // you can pass in id...
+    		container: document.getElementById('container'), // ... or DOM Element itself
+    		url : '${ctx}/resident/uploadResidency.do',
+    		flash_swf_url : '${ctx}/js/plupload-2.1.2/js/Moxie.swf',
+    		silverlight_xap_url : '${ctx}/js/plupload-2.1.2/js/Moxie.xap',
+    		
+    		multi_selection: false,
+    		multiple_queues: false,
+    		filters : {
+    			max_file_size : '10mb',
+    			mime_types: [
+    				{title : "excel files", extensions : "xls,xlsx"},
+    			]
+    		},
+    		// PreInit events, bound before the internal events
+		preinit : {
+			Init: function(up, info) {
+				log('[Init]', 'Info:', info, 'Features:', up.features);
+			},
+			UploadFile: function(up, file) {
+				log('[UploadFile]', file);
+				// You can override settings before the file is uploaded
+				// up.setOption('url', 'upload.php?id=' + file.id);
+				// up.setOption('multipart_params', {param1 : 'value1', param2 : 'value2'});
+			}
+		},
+		
+    		init: {
+    			PostInit: function() {
+    				
+    				log('[PostInit]');
+    				document.getElementById('filelist').innerHTML = '';
+
+    				document.getElementById('uploadfiles').onclick = function() {
+    					uploader.start();
+    					return false;
+    				};
+    			},
+    			FilesAdded: function(up, files) {
+     				if(up.files.length > 1) {
+     					log('up.files.length'+up.files.length);
+     					//return false;
+     				}
+     				log('[FilesAdded]');
+     				plupload.each(files, function(file) {
+     					log('  File:', file);
+     					$("#uploadTable #fileName").html(file.name);
+     					$("#uploadTable #fileSize").html(plupload.formatSize(file.size));
+     					$("#uploadTable #status").html(file.status);
+     					$("#uploadTable #progress").html(file.percent);
+     				});
+     			},
+     			UploadProgress: function(up, file) {
+     				log('[UploadProgress]', 'File:', file, "Total:", up.total);
+     				$("#uploadTable #progress").html(file.percent);
+     				//$.messager.progress('bar').progressbar("options").text=file.name+"("+file.percent+"%)";
+     				$.messager.progress('bar').progressbar("setValue",up.total.percent);
+     			},
+/* 	    			UploadComplete: function(up, files, result) {
+    				log('[UploadComplete]');
+    				$.messager.alert('提示', "上传完成", 'help');
+    				alert(result.response);
+    				$.messager.progress('close');
+    				$('#ddUpload').dialog('close');
+    			}, */
+    			FileUploaded:function(up,file,result){
+    				log('[FileUploaded]');
+    				if (result.response == "success") {
+    					$.messager.alert('提示', "上传完成", 'help');
+	    				$.messager.progress('close');
+	    				$('#ddUpload').dialog('close');
+					}else{
+						var response = JSON.parse(result.response);
+						if(response.state=="1") {
+							$.messager.alert('提示', "导入完成！", 'help');
+						} else {
+							$.messager.alert('提示', response.msg, 'help');
+						}
+					}
+    			}
+    		}
+    	});
+		uploader.init();
+	 
+	});
+function log() {
+	var str = "";
+
+	plupload.each(arguments, function(arg) {
+	var row = "";
+	
+	if (typeof(arg) != "string") {
+		plupload.each(arg, function(value, key) {
+			// Convert items in File objects to human readable form
+			if (arg instanceof plupload.File) {
+					// Convert status to human readable
+					switch (value) {
+						case plupload.QUEUED:
+							value = 'QUEUED';
+							break;
+
+						case plupload.UPLOADING:
+							value = 'UPLOADING';
+							break;
+
+						case plupload.FAILED:
+							value = 'FAILED';
+							break;
+						
+						case plupload.DONE:
+							value = 'DONE';
+							break;
+					}
+				}
+	
+			if (typeof(value) != "function") {
+				row += (row ? ', ' : '') + key + '=' + value;
+			}
+		});
+				
+						str += row + " ";
+		} else {
+			str += arg + " ";
+			}
 	});
 	
+var log = document.getElementById('console');
+	//log.innerHTML += str + "\n";
+}	 
 	
 	
 
-$('#ddUpload').dialog({
-    title: "上传",
-    closed:true,
-    modal: true, //dialog继承自window，而window里面有modal属性，所以dialog也可以使用
-
-	onClose: function() {
-		datagrid.datagrid('unselectAll');
-		datagrid.datagrid('reload');
-	}
-});
 
 
 function initCombox() {
@@ -542,11 +709,10 @@ function initCombox() {
 	 
 	 
 	// 学科combox显示
-	 $('#major').combobox({
+	 $('.major').combobox({
 		 url: "${ctx}/courseSubject/secondNode.do",
 		 valueField:'id',
 		 textField:'subjectName',
-		 multiple:true,
 		// editable:false,
 	     loadFilter: function(data){
 			   if(data!=null){
@@ -565,138 +731,27 @@ function initCombox() {
 			}
 	 }); 
 	
-	
+		$("#statues_btn_search").click(function() {
+			/* 
+			var param = $("#searchForm").serializeJson();
+			datagrid.datagrid('load', param); */
+			var status = $("#studentState").combobox("getValue");
+			    //alert(status);
+		     if(status=='1'){
+				window.location.href='${ctx}/resident/qualifyStatus.do?status='+status;
+			  } 
+		     else if(status=='2'){
+		    	 window.location.href='${ctx}/resident/qualifyStatus.do?status='+status;
+		     }
+		     else if(status=='3'){
+		    	 window.location.href='${ctx}/resident/qualifyStatus.do?status='+status;
+		     }
+		     else if(status=='4'){
+		    	 window.location.href='${ctx}/resident/qualifyStatus.do?status='+status;
+		     }
+	  });
 	 
 }
-
-
-// var uploader = new plupload.Uploader({
-// 		runtimes : 'html5,flash,silverlight,html4',
-// 		browse_button : 'pickfiles', // you can pass in id...
-// 		container: document.getElementById('container'), // ... or DOM Element itself
-// 		url : '${ctx}/person/residency/uploadResidency.do',
-// 		flash_swf_url : '${ctx}/js/plupload-2.1.2/js/Moxie.swf',
-// 		silverlight_xap_url : '${ctx}/js/plupload-2.1.2/js/Moxie.xap',
-		
-// 		multi_selection: false,
-// 		multiple_queues: false,
-// 		filters : {
-// 			max_file_size : '10mb',
-// 			mime_types: [
-// 				{title : "excel files", extensions : "xls,xlsx"},
-// 			]
-// 		},
-// 	preinit : {
-// 		Init: function(up, info) {
-// 			log('[Init]', 'Info:', info, 'Features:', up.features);
-// 		},
-// 		UploadFile: function(up, file) {
-// 			log('[UploadFile]', file);
-// 		}
-// 	},
-	
-// 		init: {
-// 			PostInit: function() {
-				
-// 				log('[PostInit]');
-// 				document.getElementById('filelist').innerHTML = '';
-
-// 				document.getElementById('uploadfiles').onclick = function() {
-// 					if(uploader.files.length ==0){
-// 						$.messager.alert('警告','请选择文件!','error');
-// 						return false;
-// 					}
-// 					$.messager.progress({  
-// 	                    title:'请稍后',  
-// 	                    msg:'正在上传......',  
-// 	                    interval:0  
-// 	                });
-// 					uploader.start();
-// 					return false;
-// 				};
-// 			},
-// 			FilesAdded: function(up, files) {
-// 				if(up.files.length > 1) {
-// 					log('up.files.length'+up.files.length);
-// 					//return false;
-// 				}
-// 				log('[FilesAdded]');
-// 				plupload.each(files, function(file) {
-// 					log('  File:', file);
-// 					$("#uploadTable #fileName").html(file.name);
-// 					$("#uploadTable #fileSize").html(plupload.formatSize(file.size));
-// 					$("#uploadTable #status").html(file.status);
-// 					$("#uploadTable #progress").html(file.percent);
-// 				});
-// 			},
-// 			UploadProgress: function(up, file) {
-// 				log('[UploadProgress]', 'File:', file, "Total:", up.total);
-// 				$("#uploadTable #progress").html(file.percent);
-// 				//$.messager.progress('bar').progressbar("options").text=file.name+"("+file.percent+"%)";
-// 				$.messager.progress('bar').progressbar("setValue",up.total.percent);
-// 			},
-// 			UploadComplete: function(up, files, result) {
-// 				log('[UploadComplete]');
-// 				uploadResult=JSON.parse(uploadResult);
-// 					if(uploadResult.row>0){
-// 					var rowmsg="第"+uploadResult.row+"行数据出错：";
-// 					if(uploadResult.msg==1){
-//    				$.messager.alert('提示', rowmsg+"必填项不能为空", 'error');
-//    				$.messager.progress('close');
-//    				}/* else if(uploadResult==2){
-//    					$.messager.alert('提示', "培训时间格式应为yyyy-mm-dd", 'error');
-//    					$.messager.progress('close');
-//    				} */
-//    				else if(uploadResult.msg==3){
-//    					$.messager.alert('提示', rowmsg+"手机号错误", 'error');	
-//    					$.messager.progress('close');
-//    				}else if(uploadResult.msg==4){
-//    					$.messager.alert('提示', rowmsg+"身份证号错误", 'error');
-//    					$.messager.progress('close');
-//    				}else if(uploadResult.msg==5){
-// 	    				$.messager.alert('提示', rowmsg+"年级格式应为yyyy", 'error');
-// 	    				$.messager.progress('close');
-// 					} else if(uploadResult.msg==6){
-// 	    				$.messager.alert('提示', rowmsg+"纳入培训时间格式不正确", 'error');
-// 	    				$.messager.progress('close');
-// 					} else if(uploadResult.msg==7){
-// 	    				$.messager.alert('提示', rowmsg+"身份不匹配", 'error');
-// 	    				$.messager.progress('close');
-// 					}else if(uploadResult.msg==9){
-// 						$.messager.alert('提示', rowmsg+"身份证已存在，无法导入！", 'error');
-// 	    				$.messager.progress('close');
-// 					}else if(uploadResult.msg==10){
-// 						$.messager.alert('提示', rowmsg+"数据出错，无法执行修改操作，请重新校验后上传！", 'error');
-// 	    				$.messager.progress('close');
-// 					}else if(uploadResult.msg==11){
-// 						$.messager.alert('提示', rowmsg+"数据格式不匹配，请核对！", 'error');
-// 	    				$.messager.progress('close');
-// 					}else if(uploadResult.msg==12){
-// 						$.messager.alert('提示', rowmsg+"年资输入不合法，正确范围为1-3年!", 'error');
-// 	    				$.messager.progress('close');
-// 					}
-// 				}else if(uploadResult.msg==8){
-// 	    				$.messager.alert('提示', "导入失败", 'error');
-// 	    				$.messager.progress('close');
-// 				}else{
-//    					$.messager.alert('提示', "上传完成", 'help');
-// 	    				$.messager.progress('close');
-// 				}
-// 					$("#uploadTable #fileName").html("");
-// 					$("#uploadTable #fileSize").html("");
-// 					$("#uploadTable #status").html("");
-// 					$("#uploadTable #progress").html("");
-// 					$.messager.progress('close');
-// 					$('#ddUpload').dialog('close');	
-// 			}, 
-// 			FileUploaded:function(up,file,result){
-// 				log('[FileUploaded]');
-// 				uploadResult=(result.response);
-// 			} 
-// 		}
-// 	});
-// 	uploader.init();
-// 	 initCombox();
 
 </script>
 	
@@ -713,7 +768,7 @@ function initCombox() {
 					<tr>
 						<td>姓名:</td>
 						<td><input class="easyui-textbox" type="text" id="teacherName"
-							name="staffName"></input></td>
+							name="name"></input></td>
 
 						<td><a href="#" id="th_search" class="easyui-linkbutton"
 							data-options="iconCls:'icon-search'" style="width: 80px">Search</a></td>
@@ -728,7 +783,7 @@ function initCombox() {
 				
 </div>
 
-<div id="add" title="My Dialog"  style="width:800px;height:450px; text-align: left; " data-options="closed:true"> 
+<div id="add" title="My Dialog"  style="width:800px;height:300px; text-align: left; " data-options="closed:true"> 
 				    <form id="ff" method="post"  action="${ctx}/person/residency/saveResidency.do" >
 				    	<input type="hidden" id="id" name="id">
 				    	<!-- 是否清除轮转计划 -->
@@ -737,7 +792,7 @@ function initCombox() {
 						<table cellpadding="3" >
 				    		<tr>
 				    			<td>身份证:</td>
-				    			<td><input class="easyui-textbox"   type="text" id="idCard" name="idCard" data-options="required:true"  value="请输入身份证" /></td>
+				    			<td><input class="easyui-textbox"   type="text" id="idCard" name="idCard" data-options="required:true"  value="请输入身份证" onfocus="this.value=''" onblur="this.value='请输入身份证'" style="color:#ccc"/></td>
 				    			<td>姓名:</td>
 				    			<td><input class="easyui-textbox" type="text" id="name"  name="name"/></td>
 				    			<td>性别:</td>
@@ -754,15 +809,14 @@ function initCombox() {
 					    		
 					    		<td>学员编号:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="adminno" name="adminno"/></td>	
-				    		</tr>
-				    		<tr>
+				    		
 				    		<td>学历:</td>
 					    		<td><input  class="easyui-combobox"  id="education" name="education" /></td>
+					    	</tr>
+				    		<tr>
 					    		<td>所属单位:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="company"  name="company"/>
-				    		</tr>
 				    		
-				    		<tr>
 				    			<td>医师资格:</td>
 				    			<td><input  class="easyui-combobox"  id="doctorQulification" name="doctorQulification"  /> 
 				    			</td>
@@ -775,43 +829,35 @@ function initCombox() {
 				    			<td>培训状态:</td>
 				    			<td><input  class="easyui-combobox"  id="trainState" name="trainState"  /> 
 				    			</td>
-				    		</tr>
-				    		<tr>
+				    		
 				    			<td>银行账号:</td>
 				    			<td><input  class="easyui-textbox"  id="bankCard" name="bankCard"  /> 
 				    			</td>
-				    			
-				    		</tr>
-				    		<tr>
+				    		
 				    			<td>学员状态:</td>
 				    			<td><input  class="easyui-textbox" type="text" id="studentState"  name="studentState"/>
-				    			<td>在培学科:</td>
-				    		    <td><input  class="easyui-combobox" type="text" id="major" name="major"/></td>
-				    			
-				    		</tr>
-				    		
+				    			</tr>
 				    		<tr>
+				    			<td>在培学科:</td>
+				    		    <td><input  class="easyui-combobox major" type="text" id="major" name="major"/></td>
 					    		<td>所属科室:</td>
 					    		<td><input class="easyui-combobox"  id="office"  name="office"/></td>
 					    		<td>毕业院校:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="graduateInstitutions"  name="graduateInstitutions"/></td>
+					    			
+				    		</tr>
+				    		<tr>
 					    		<td>最高学位:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="maxGraduate"  name="maxGraduate"/></td>
-				    		</tr>
 				    		
-				    		<tr>
 					    		<td>专业:</td>
 					    		<td><input class="easyui-combobox"  id="career"  name="career"/></td>
-					    		
-				    		</tr>
-				    		
-				    		<tr>
 				    		 
 				    		   	<td>职称:</td>
 						    	<td>
 						    	<select style="width: 100px" class="easyui-combobox" id="technical" name="technical"  data-options="">
 						        </select></td>
-				    		</tr>
+						    </tr>
 				    		<tr>
 				    			<td>年级:</td>
 				    			<td><input  class="easyui-textbox" type="text" id="grade"  name="grade" data-options="required:true" />
@@ -821,8 +867,8 @@ function initCombox() {
 				  </form>
 			</div>
 					
-           <div id="dd" title="My Dialog"  style="width:800px;height:450px; text-align: left; " data-options="closed:true"> 
-				    <form id="ff" method="post"  action="${ctx}/person/residency/saveResidency.do" >
+           <div id="dd" title="My Dialog"  style="width:800px;height:300px; text-align: left; " data-options="closed:true"> 
+				    <form id="ff" method="post"  action="${ctx}/resident/saveResidency.do" >
 				    	<input type="hidden" id="id" name="id">
 				    	<!-- 是否清除轮转计划 -->
 				    	<input type="hidden" id="clearRotary" name="clearRotary" />
@@ -847,58 +893,43 @@ function initCombox() {
 					    		
 					    		<td>学员编号:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="adminno" name="adminno"/></td>
-					    		
-				    		</tr>
-				    		<tr>
+					    	
 				    			<td>学历:</td>
 					    		<td><input  class="easyui-combobox"  id="education" name="education" /></td>
+				    		</tr>
+				    		<tr>
 					    		<td>所属单位:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="company"  name="company"/>
-				    		</tr>
-				    		
-				    		<tr>
 				    			<td>医师资格:</td>
 				    			<td><input  class="easyui-combobox"  id="doctorQulification" name="doctorQulification"  /> 
 				    			</td>
 				    			<td>执业资格:</td>
 				    			<td><input  class="easyui-combobox"  id="practicing" name="practicing"  /> 
 				    			</td>
-				   
 				    		</tr>
-				    		
 				    		<tr>
 				    			<td>培训状态:</td>
 				    			<td><input  class="easyui-combobox"  id="trainState" name="trainState"  /> 
 				    			</td>
-				    		</tr>
-		
-				    		<tr>
 				    			<td>银行账号:</td>
 				    			<td><input  class="easyui-textbox"  id="bankNum" name="bankNum"  /> 
-				    			</td>	
-				    		</tr>
-				    		<tr>
+				    			</td>
 				    			<td>学员状态:</td>
 				    			<td><input  class="easyui-textbox" type="text" id="studentState"  name="studentState"/>
-				    			<td>在培学科:</td>
-				    		    <td><input  class="easyui-combobox" type="text" id="major" name="major"/></td>	
 				    		</tr>
-				    		
 				    		<tr>
+				    			<td>在培学科:</td>
+				    		    <td><input  class="easyui-combobox major" type="text" id="major" name="major"/></td>	
 					    		<td>所属科室:</td>
 					    		<td><input class="easyui-combobox"  id="office"  name="office"/></td>
 					    		<td>毕业院校:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="graduateInstitutions"  name="graduateInstitutions"/></td>
+				    		</tr>
+				    		<tr>
 					    		<td>最高学位:</td>
 					    		<td><input  class="easyui-textbox" type="text" id="maxGraduate"  name="maxGraduate"/></td>
-				    		</tr>
-				    		
-				    		<tr>
 					    		<td>专业:</td>
 					    		<td><input class="easyui-combobox"  id="career"  name="career"/></td>
-				    		</tr>
-				    		
-				    		<tr> 
 				    		   	<td>职称:</td>
 						    	<td>
 						    	<select style="width: 100px" class="easyui-combobox" id="technical" name="technical"  data-options="">
@@ -912,7 +943,10 @@ function initCombox() {
 				    		</table>
 				  </form>
 			</div>
-		
+			
+		<div id="grid-export-form" class="x-hidden">
+			<form method="POST" name="GridExportForm"></form>
+		</div>
 		
 		<div id="ddUpload" title="My Dialog" style="width: 600px; height: 400px; text-align: center;" data-options="closed:true">
 

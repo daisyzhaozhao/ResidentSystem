@@ -1,53 +1,91 @@
 package cn.edu.ResidentSystem.model;
 
 public class Admin {
+	//学员编号
     private Integer adminno;
-
-    private String adminname;
-
-    private String adminpass;
-    
+    //
     private int id;
-    
+    //年级
     private String grade;
-    
+    //姓名
     private String name;
-    
+    //学员状态
     private String studentState;
-    
+    //培训状态
     private String trainState;
-    
+    //性别
     private String sex;
-    
+    //学历
     private String education;
-    
+    //导师
     private String teacher;
-    
+    //在陪学科
 	private String major;
-    
+    //所属单位
     private String company;
-    
+    //所属科室
     private String office;
-    
+    //手机
 	private String phoneNum;
-    
+    //银行账号
     private String bankNum;
-    
+    //身份证
     private String idCard;
-
+    //毕业院校
 	private String graduateInstitutions;
-    
+    //最高学位
     private String maxGraduate;
-    
+    //职称
     private String technical;
-    
+    //医师资格
     private String doctorQulification;
-    
+    //执业资格
     private String practicing;
-    
+    //专业
     private String career;
+    //身份类别
+    private String identity;
+    //是否执业医师
+    private String yorndoctor;
+    //培训年限
+    private String trainyear;
+   
+    
+    private int login_id;
 
-    public int getId() {
+    public int getLogin_id() {
+		return login_id;
+	}
+
+	public void setLogin_id(int login_id) {
+		this.login_id = login_id;
+	}
+
+	public String getTrainyear() {
+		return trainyear;
+	}
+
+	public void setTrainyear(String trainyear) {
+		this.trainyear = trainyear;
+	}
+
+	public String getYorndoctor() {
+		return yorndoctor;
+	}
+
+	public void setYorndoctor(String yorndoctor) {
+		this.yorndoctor = yorndoctor;
+	}
+
+	public String getIdentity() {
+		return identity;
+	}
+
+	public void setIdentity(String identity) {
+		this.identity = identity;
+	}
+
+	public int getId() {
 		return id;
 	}
 
@@ -215,19 +253,5 @@ public class Admin {
         this.adminno = adminno;
     }
 
-    public String getAdminname() {
-        return adminname;
-    }
-
-    public void setAdminname(String adminname) {
-        this.adminname = adminname;
-    }
-
-    public String getAdminpass() {
-        return adminpass;
-    }
-
-    public void setAdminpass(String adminpass) {
-        this.adminpass = adminpass;
-    }
+   
 }
